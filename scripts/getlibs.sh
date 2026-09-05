@@ -28,7 +28,7 @@ cd "freetype-$BUILD_FREETYPE_VERSION"
     --host="$TARGET" \
     --prefix="$PWD/installed" \
     --enable-static=yes \
-    --enable-shared=no \
+    --enable-shared=yes \
     --with-png=no \
     --with-zlib=no \
     --with-bzip2=no \

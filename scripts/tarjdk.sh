@@ -21,6 +21,11 @@ if [[ -z "$OUTPUT_DIR" || ! -d "$OUTPUT_DIR" ]]; then
     exit 1
 fi
 
+if [[ -f "$ROOT_DIR/build_deps/freetype-$BUILD_FREETYPE_VERSION/installed/lib/libfreetype.so" ]]; then
+    echo "Bundling compiled libfreetype.so into JDK lib directory..."
+    cp -P "$ROOT_DIR/build_deps/freetype-$BUILD_FREETYPE_VERSION/installed/lib/libfreetype.so"* "$OUTPUT_DIR/lib/" 2>/dev/null || true
+fi
+
 echo "Stripping debug symbols..."
 find "$OUTPUT_DIR/lib" "$OUTPUT_DIR/bin" -type f -name "*.so" -o -type f -perm /111 -exec $STRIP --strip-unneeded {} + 2>/dev/null || true
 
