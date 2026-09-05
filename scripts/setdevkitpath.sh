@@ -9,13 +9,16 @@ export BUILD_FREETYPE_VERSION=${BUILD_FREETYPE_VERSION:-2.13.3}
 export JDK_DEBUG_LEVEL=${JDK_DEBUG_LEVEL:-release}
 export JVM_VARIANTS=${JVM_VARIANTS:-server}
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 if [[ -z "$ANDROID_NDK_HOME" ]]; then
-    if [[ -d "$GITHUB_WORKSPACE/android-ndk-$NDK_VERSION" ]]; then
+    if [[ -d "$ROOT_DIR/android-ndk-$NDK_VERSION" ]]; then
+        export ANDROID_NDK_HOME="$ROOT_DIR/android-ndk-$NDK_VERSION"
+    elif [[ -d "$PWD/android-ndk-$NDK_VERSION" ]]; then
+        export ANDROID_NDK_HOME="$PWD/android-ndk-$NDK_VERSION"
+    elif [[ -n "$GITHUB_WORKSPACE" && -d "$GITHUB_WORKSPACE/android-ndk-$NDK_VERSION" ]]; then
         export ANDROID_NDK_HOME="$GITHUB_WORKSPACE/android-ndk-$NDK_VERSION"
-    elif [[ -d "/root/android-ndk-$NDK_VERSION" ]]; then
-        export ANDROID_NDK_HOME="/root/android-ndk-$NDK_VERSION"
-    elif [[ -d "/usr/local/lib/android/sdk/ndk/$NDK_VERSION" ]]; then
-        export ANDROID_NDK_HOME="/usr/local/lib/android/sdk/ndk/$NDK_VERSION"
     else
         export ANDROID_NDK_HOME="$PWD/android-ndk-$NDK_VERSION"
     fi

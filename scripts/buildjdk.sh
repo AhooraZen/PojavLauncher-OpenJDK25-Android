@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 set -e
 
-source "$(dirname "$0")/setdevkitpath.sh"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-cd jdk25
+source "$SCRIPT_DIR/setdevkitpath.sh"
 
-export FREETYPE_DIR="$PWD/../build_deps/freetype-$BUILD_FREETYPE_VERSION/installed"
-export CUPS_DIR="$PWD/../build_deps/cups"
+cd "$ROOT_DIR/jdk25"
+
+export FREETYPE_DIR="$ROOT_DIR/build_deps/freetype-$BUILD_FREETYPE_VERSION/installed"
+export CUPS_DIR="$ROOT_DIR/build_deps/cups"
 
 echo "Configuring OpenJDK 25 for $TARGET..."
 

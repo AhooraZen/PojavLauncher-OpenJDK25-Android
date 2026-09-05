@@ -54,7 +54,7 @@ jobs:
           NDK_VER="${{ github.event.inputs.ndk_version || 'r28c' }}"
           echo "Downloading Android NDK $NDK_VER..."
           curl -sSL "https://dl.google.com/android/repository/android-ndk-${NDK_VER}-linux.zip" -o ndk.zip
-          unzip -q ndk.zip -d $GITHUB_WORKSPACE/
+          unzip -q ndk.zip -d "$GITHUB_WORKSPACE"
           rm ndk.zip
           echo "ANDROID_NDK_HOME=$GITHUB_WORKSPACE/android-ndk-$NDK_VER" >> $GITHUB_ENV
 

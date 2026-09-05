@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 set -e
 
-source "$(dirname "$0")/setdevkitpath.sh"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-OUTPUT_DIR="jdk25/build/linux-${TARGET_JDK}-${JDK_DEBUG_LEVEL}/images/jdk"
+source "$SCRIPT_DIR/setdevkitpath.sh"
+
+cd "$ROOT_DIR"
+
+OUTPUT_DIR="$ROOT_DIR/jdk25/build/linux-${TARGET_JDK}-${JDK_DEBUG_LEVEL}/images/jdk"
 TAR_NAME="openjdk-25-${TARGET_JDK}-android16-pojav.tar.xz"
 
 if [[ ! -d "$OUTPUT_DIR" ]]; then
     # Fallback search if path structure differs slightly
-    OUTPUT_DIR=$(find jdk25/build -type d -name "jdk" | head -n 1)
+    OUTPUT_DIR=$(find "$ROOT_DIR/jdk25/build" -type d -name "jdk" 2>/dev/null | head -n 1)
 fi
 
 if [[ -z "$OUTPUT_DIR" || ! -d "$OUTPUT_DIR" ]]; then

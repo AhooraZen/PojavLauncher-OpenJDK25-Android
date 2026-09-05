@@ -1,16 +1,22 @@
 #!/usr/bin/env bash
 set -e
 
-source "$(dirname "$0")/setdevkitpath.sh"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-mkdir -p build_deps
-cd build_deps
+source "$SCRIPT_DIR/setdevkitpath.sh"
+
+mkdir -p "$ROOT_DIR/build_deps"
+cd "$ROOT_DIR/build_deps"
 
 # Download FreeType
 if [[ ! -d "freetype-$BUILD_FREETYPE_VERSION" ]]; then
     echo "Downloading FreeType $BUILD_FREETYPE_VERSION..."
-    curl -sSL "https://download.savannah.gnu.org/releases/freetype/freetype-$BUILD_FREETYPE_VERSION.tar.xz" -o freetype.tar.xz
-    tar -xf freetype.tar.xz
+    if ! curl -sSL -f "https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-2-13-3/freetype-VER-2-13-3.tar.gz" -o freetype.tar.gz; then
+        curl -sSL -f "https://sourceforge.net/projects/freetype/files/freetype2/$BUILD_FREETYPE_VERSION/freetype-$BUILD_FREETYPE_VERSION.tar.gz/download" -o freetype.tar.gz
+    fi
+    mkdir -p "freetype-$BUILD_FREETYPE_VERSION"
+    tar -xzf freetype.tar.gz --strip-components=1 -C "freetype-$BUILD_FREETYPE_VERSION"
 fi
 
 # Build FreeType for Android
