@@ -64,4 +64,37 @@ EOF
 EOF
 fi
 
+# Setup ALSA stub headers and libraries
+if [[ ! -d "alsa" ]]; then
+    echo "Setting up ALSA stub headers and library..."
+    mkdir -p alsa/include/alsa
+    cat << 'EOF' > alsa/include/alsa/asoundlib.h
+#ifndef _ALSA_ASOUNDLIB_H
+#define _ALSA_ASOUNDLIB_H
+typedef struct _snd_pcm snd_pcm_t;
+typedef struct _snd_pcm_hw_params snd_pcm_hw_params_t;
+typedef struct _snd_pcm_sw_params snd_pcm_sw_params_t;
+typedef struct _snd_mixer snd_mixer_t;
+typedef struct _snd_mixer_elem snd_mixer_elem_t;
+#endif
+EOF
+    mkdir -p alsa/lib
+    "$AR" cru alsa/lib/libasound.a
+fi
+
+# Create dummy libraries so OpenJDK makefiles won't fail to link against them
+mkdir -p "$ROOT_DIR/build_deps/dummy_libs"
+"$AR" cru "$ROOT_DIR/build_deps/dummy_libs/libpthread.a"
+"$AR" cru "$ROOT_DIR/build_deps/dummy_libs/librt.a"
+"$AR" cru "$ROOT_DIR/build_deps/dummy_libs/libthread_db.a"
+"$AR" cru "$ROOT_DIR/build_deps/dummy_libs/libasound.a"
+
+# Symlink host X11 and fontconfig headers into Android NDK sysroot for headless compilation
+if [[ -d "$ANDROID_INCLUDE" ]]; then
+    echo "Symlinking X11 and fontconfig headers into $ANDROID_INCLUDE..."
+    [[ -d /usr/include/X11 ]] && ln -s -f /usr/include/X11 "$ANDROID_INCLUDE/"
+    [[ -d /usr/include/fontconfig ]] && ln -s -f /usr/include/fontconfig "$ANDROID_INCLUDE/"
+    ln -s -f "$ROOT_DIR/build_deps/cups/cups" "$ANDROID_INCLUDE/"
+fi
+
 echo "=== Dependencies build complete ==="

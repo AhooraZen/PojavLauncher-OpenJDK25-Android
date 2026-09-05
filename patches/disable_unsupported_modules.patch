@@ -1,0 +1,18 @@
+--- a/make/modules/java.desktop/Lib.gmk
++++ b/make/modules/java.desktop/Lib.gmk
+@@ -73,5 +73,5 @@ ifeq ($(call isTargetOs, aix), false)
+   ))
+
+-  TARGETS += $(BUILD_LIBJSOUND)
++  # TARGETS += $(BUILD_LIBJSOUND)
+ endif
+
+--- a/make/modules/jdk.hotspot.agent/Lib.gmk
++++ b/make/modules/jdk.hotspot.agent/Lib.gmk
+@@ -74,5 +74,5 @@ $(eval $(call SetupJdkLibrary, BUILD_LIBSA, \
+     LIBS_windows := dbgeng.lib $(WIN_JAVA_LIB), \
+ ))
+
+-TARGETS += $(BUILD_LIBSA)
++# TARGETS += $(BUILD_LIBSA)
+

@@ -65,6 +65,6 @@ export STRIP="$TOOLCHAIN/bin/llvm-strip"
 export CFLAGS="-O3 $ARCH_FLAGS -D__ANDROID_API__=$API -D__ANDROID__ -I$ANDROID_INCLUDE -I$ANDROID_INCLUDE/$TARGET -fPIC"
 export CXXFLAGS="$CFLAGS -stdlib=libc++"
 # Enforce 16KB page boundary alignment on ELF binaries for Android 16 & future compatibility
-export LDFLAGS="-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384 -llog -landroid -lc++_shared"
+export LDFLAGS="-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384 -L$ROOT_DIR/build_deps/dummy_libs -L$ROOT_DIR/build_deps/alsa/lib -Wl,--undefined-version -llog -landroid -lc++_shared"
 
 echo "=== Environment configured for $TARGET (Target JDK: $TARGET_JDK) ==="

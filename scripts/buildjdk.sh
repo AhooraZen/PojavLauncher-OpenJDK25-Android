@@ -10,6 +10,7 @@ cd "$ROOT_DIR/jdk25"
 
 export FREETYPE_DIR="$ROOT_DIR/build_deps/freetype-$BUILD_FREETYPE_VERSION/installed"
 export CUPS_DIR="$ROOT_DIR/build_deps/cups"
+export ALSA_DIR="$ROOT_DIR/build_deps/alsa"
 
 echo "Configuring OpenJDK 25 for $TARGET..."
 
@@ -49,6 +50,10 @@ bash ./configure \
     --with-freetype-include="$FREETYPE_DIR/include/freetype2" \
     --with-freetype-lib="$FREETYPE_DIR/lib" \
     --with-cups-include="$CUPS_DIR" \
+    --with-alsa-include="$ALSA_DIR/include" \
+    --with-alsa-lib="$ALSA_DIR/lib" \
+    --with-fontconfig-include="$ANDROID_INCLUDE" \
+    --x-includes="$ANDROID_INCLUDE/X11" \
     --enable-cds=no
 
 echo "Building OpenJDK 25 (images target)..."
