@@ -4,7 +4,7 @@ set -e
 # Defaults
 export TARGET_VERSION=${TARGET_VERSION:-25}
 export NDK_VERSION=${NDK_VERSION:-r28c}
-export API=${API:-26}
+export API=${API:-28}
 export BUILD_FREETYPE_VERSION=${BUILD_FREETYPE_VERSION:-2.13.3}
 export JDK_DEBUG_LEVEL=${JDK_DEBUG_LEVEL:-release}
 export JVM_VARIANTS=${JVM_VARIANTS:-server}

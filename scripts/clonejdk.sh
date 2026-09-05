@@ -18,11 +18,18 @@ echo "Applying Android / PojavLauncher patches..."
 for patch in "$ROOT_DIR"/patches/*.patch; do
     if [[ -f "$patch" ]]; then
         echo "Applying $(basename "$patch")..."
-        if ! patch -p1 -N --dry-run < "$patch" >/dev/null 2>&1; then
-            echo "Patch $(basename "$patch") already applied or does not match, skipping."
-        else
+        if patch -p1 -N --dry-run < "$patch" >/dev/null 2>&1; then
             patch -p1 -N < "$patch"
             echo "Patch $(basename "$patch") successfully applied."
+        elif patch -p1 -N -l --dry-run < "$patch" >/dev/null 2>&1; then
+            patch -p1 -N -l < "$patch"
+            echo "Patch $(basename "$patch") applied with whitespace tolerance."
+        elif patch -p1 -N -F3 --dry-run < "$patch" >/dev/null 2>&1; then
+            patch -p1 -N -F3 < "$patch"
+            echo "Patch $(basename "$patch") applied with fuzz."
+        else
+            echo "Patch $(basename "$patch") already applied or failed dry-run, attempting direct patch..."
+            patch -p1 -N -r - < "$patch" || echo "Patch $(basename "$patch") skipped."
         fi
     fi
 done

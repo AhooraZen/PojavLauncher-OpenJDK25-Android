@@ -24,3 +24,21 @@
    }
 +#endif
  }
+
+@@ -2030,6 +2034,16 @@
+   // Run the command with /bin/sh to parse the command string.
+   char* const argv[] = { (char*) "sh", (char*) "-c", (char*) cmd, nullptr };
+   char* const env[] = { nullptr };
++#if defined(__ANDROID__) && __ANDROID_API__ < 28
++  pid_t pid = fork();
++  if (pid == 0) {
++    execve("/bin/sh", argv, env);
++    _exit(127);
++  }
++  if (pid > 0) {
++    int status;
++    waitpid(pid, &status, 0);
++  }
++#else
+   int rc = ::posix_spawn(&pid, "/bin/sh", nullptr, nullptr, (char**) argv, env);
++#endif

@@ -9,7 +9,7 @@
  // dlvsym is not a part of POSIX
  // and musl libc doesn't implement it.
  static void *dlvsym(void *handle,
-@@ -691,6 +691,9 @@
+@@ -690,6 +690,10 @@
  void os::Linux::libpthread_init() {
    // Save glibc and pthread version strings.
 +#ifdef __ANDROID__
@@ -19,7 +19,7 @@
  #if !defined(_CS_GNU_LIBC_VERSION) || \
      !defined(_CS_GNU_LIBPTHREAD_VERSION)
    #error "glibc too old (< 2.3.2)"
-@@ -714,6 +717,7 @@
+@@ -714,6 +718,7 @@
    confstr(_CS_GNU_LIBPTHREAD_VERSION, str, n);
    os::Linux::set_libpthread_version(str);
  #endif
@@ -27,7 +27,7 @@
  }
 
  /////////////////////////////////////////////////////////////////////////////
-@@ -2008,11 +2012,12 @@
+@@ -2008,11 +2013,12 @@
  const char* os::Linux::dll_path(void* lib) {
    struct link_map *lmap;
    const char* l_path = nullptr;
@@ -42,7 +42,7 @@
    return l_path;
  }
 
-@@ -3319,7 +3324,7 @@
+@@ -3319,7 +3325,7 @@
    }
 
    if (sched_getcpu() == -1) {
@@ -51,7 +51,7 @@
    }
  }
 
-@@ -5279,7 +5284,20 @@
+@@ -5279,7 +5285,20 @@
  int os::loadavg(double loadavg[], int nelem) {
 +#if defined(__ANDROID__) && __ANDROID_API__ < 29
 +  if (nelem < 0) return -1;
