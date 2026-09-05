@@ -1,0 +1,48 @@
+diff --git a/src/hotspot/os/linux/os_linux.cpp b/src/hotspot/os/linux/os_linux.cpp
+--- a/src/hotspot/os/linux/os_linux.cpp
++++ b/src/hotspot/os/linux/os_linux.cpp
+@@ -105,6 +105,10 @@
+ # include <sys/shm.h>
+ # include <link.h>
+
++#if defined(__ANDROID__)
++#include <android/api-level.h>
++#endif
++
+ #define NO_MINCORE_FUNCTION
+
+ // pthread_getattr_np needed by os::Linux::ManuallyExpandStack
+@@ -1900,7 +1904,11 @@ void os::Linux::init_thread_totaltick_cpu_time() {
+ }
+
+ void os::Linux::init_thread_totaltick_cpu_time() {
++#if defined(__ANDROID__)
++  _supports_fast_thread_cpu_time = false;
++#else
+   _supports_fast_thread_cpu_time = true;
++#endif
+ }
+
+ // Dynamic page size determination (16KB / 4KB runtime detection)
+@@ -3200,7 +3208,11 @@ void* os::dll_load(const char *filename, char *ebuf, int ebuflen) {
+   void * result = ::dlopen(filename, RTLD_LAZY);
+   if (result == NULL) {
+     const char* error_report = ::dlerror();
+-    if (error_report != NULL) {
++    if (error_report != NULL && error_report[0] != '\0') {
+       jio_snprintf(ebuf, ebuflen, "%s", error_report);
+     } else {
+       jio_snprintf(ebuf, ebuflen, "Unknown dlopen error");
+diff --git a/src/hotspot/os/linux/os_perf_linux.cpp b/src/hotspot/os/linux/os_perf_linux.cpp
+--- a/src/hotspot/os/linux/os_perf_linux.cpp
++++ b/src/hotspot/os/linux/os_perf_linux.cpp
+@@ -52,6 +52,10 @@
+ #include <sys/sysinfo.h>
+ #include <sys/times.h>
+
++#if defined(__ANDROID__)
++#define gethostbyname_r(a,b,c,d,e,f) (-1)
++#endif
++
+ static const char MNT_DIR[] = "/proc/mounts";
+ static const char SYSTEM_BUS_SYS_DEVICES_SYSTEM_CPU[] = "/sys/devices/system/cpu";
