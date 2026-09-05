@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-JDK_REPO="${JDK_REPO:-https://github.com/openjdk/jdk}"
+JDK_REPO="${JDK_REPO:-https://github.com/openjdk/jdk25u}"
 JDK_BRANCH="${JDK_BRANCH:-master}"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"

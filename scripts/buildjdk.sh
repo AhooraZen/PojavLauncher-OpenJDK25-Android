@@ -13,7 +13,15 @@ export CUPS_DIR="$ROOT_DIR/build_deps/cups"
 
 echo "Configuring OpenJDK 25 for $TARGET..."
 
+BOOT_JDK_ARG=""
+if [[ -n "$BOOT_JDK" && -d "$BOOT_JDK" ]]; then
+    BOOT_JDK_ARG="--with-boot-jdk=$BOOT_JDK"
+elif [[ -n "$JAVA_HOME" && -d "$JAVA_HOME" ]]; then
+    BOOT_JDK_ARG="--with-boot-jdk=$JAVA_HOME"
+fi
+
 bash ./configure \
+    $BOOT_JDK_ARG \
     --openjdk-target="$TARGET" \
     --with-extra-cflags="$CFLAGS" \
     --with-extra-cxxflags="$CXXFLAGS" \

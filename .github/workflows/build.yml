@@ -32,11 +32,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Boot JDK (JDK 24)
+      - name: Set up Boot JDK
         uses: actions/setup-java@v4
         with:
           java-version: '24'
           distribution: 'temurin'
+
+      - name: Set Boot JDK Environment Variables
+        run: |
+          echo "BOOT_JDK=$JAVA_HOME" >> $GITHUB_ENV
 
       - name: Install Host Build Dependencies
         run: |
