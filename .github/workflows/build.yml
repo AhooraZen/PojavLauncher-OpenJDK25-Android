@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        arch: ["aarch64", "arm", "x86_64", "x86"]
+        arch: ["aarch64"]
       fail-fast: false
 
     name: "Build OpenJDK 25 - Android ${{ matrix.arch }}"

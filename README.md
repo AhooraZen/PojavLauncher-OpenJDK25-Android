@@ -5,11 +5,7 @@ Automated GitHub Actions workflow and toolchain scripts to compile **OpenJDK 25*
 ## Features
 
 - **OpenJDK Version**: 25 (built with Boot JDK 24).
-- **Target Architectures**:
-  - `aarch64` (ARM64)
-  - `arm` (ARM32 / ARMv7-A)
-  - `x86_64` (AMD64)
-  - `x86` (i686)
+- **Target Architecture**: `aarch64` (ARM64)
 - **Android 16 Compatibility**:
   - Android NDK `r28c` toolchain with LLVM/Clang.
   - Full ELF 16KB segment alignment (`-Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384`).
@@ -18,11 +14,8 @@ Automated GitHub Actions workflow and toolchain scripts to compile **OpenJDK 25*
 
 ## Output Format
 
-The build artifacts are produced as `.tar.xz` archives:
+The build artifact is produced as `.tar.xz`:
 - `openjdk-25-aarch64-android16-pojav.tar.xz`
-- `openjdk-25-arm-android16-pojav.tar.xz`
-- `openjdk-25-x86_64-android16-pojav.tar.xz`
-- `openjdk-25-x86-android16-pojav.tar.xz`
 
 ## Manual Trigger
 
