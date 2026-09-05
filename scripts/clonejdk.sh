@@ -17,8 +17,13 @@ cd "$ROOT_DIR/jdk25"
 echo "Applying Android / PojavLauncher patches..."
 for patch in "$ROOT_DIR"/patches/*.patch; do
     if [[ -f "$patch" ]]; then
-        echo "Applying $patch..."
-        patch -p1 -N -r - < "$patch" || echo "Patch $(basename "$patch") skipped or already applied."
+        echo "Applying $(basename "$patch")..."
+        if ! patch -p1 -N --dry-run < "$patch" >/dev/null 2>&1; then
+            echo "Patch $(basename "$patch") already applied or does not match, skipping."
+        else
+            patch -p1 -N < "$patch"
+            echo "Patch $(basename "$patch") successfully applied."
+        fi
     fi
 done
 

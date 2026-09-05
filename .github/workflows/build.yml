@@ -42,24 +42,44 @@ jobs:
         run: |
           echo "BOOT_JDK=$JAVA_HOME" >> $GITHUB_ENV
 
-      - name: Install Host Build Dependencies
+      - name: Install Host Build Dependencies & ccache
         run: |
           sudo apt update
           sudo apt -y install \
             autoconf automake libtool pkg-config \
             python3 python-is-python3 unzip zip \
-            systemtap-sdt-dev clang lld llvm \
+            systemtap-sdt-dev clang lld llvm ccache \
             libasound2-dev libelf-dev libfontconfig1-dev \
             libx11-dev libxext-dev libxrandr-dev libxrender-dev libxtst-dev libxt-dev \
             build-essential xz-utils curl git
 
+      - name: Setup ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ccache
+          key: ccache-${{ matrix.arch }}-${{ github.sha }}
+          restore-keys: |
+            ccache-${{ matrix.arch }}-
+
+      - name: Setup Android NDK Cache
+        id: cache-ndk
+        uses: actions/cache@v4
+        with:
+          path: android-ndk-${{ github.event.inputs.ndk_version || 'r28c' }}
+          key: ndk-${{ github.event.inputs.ndk_version || 'r28c' }}
+
       - name: Setup Android NDK ${{ github.event.inputs.ndk_version || 'r28c' }}
+        if: steps.cache-ndk.outputs.cache-hit != 'true'
         run: |
           NDK_VER="${{ github.event.inputs.ndk_version || 'r28c' }}"
           echo "Downloading Android NDK $NDK_VER..."
           curl -sSL "https://dl.google.com/android/repository/android-ndk-${NDK_VER}-linux.zip" -o ndk.zip
           unzip -q ndk.zip -d "$GITHUB_WORKSPACE"
           rm ndk.zip
+
+      - name: Export NDK Path
+        run: |
+          NDK_VER="${{ github.event.inputs.ndk_version || 'r28c' }}"
           echo "ANDROID_NDK_HOME=$GITHUB_WORKSPACE/android-ndk-$NDK_VER" >> $GITHUB_ENV
 
       - name: Configure Host Compilers to Clang
@@ -68,6 +88,8 @@ jobs:
           sudo update-alternatives --set cc /usr/bin/clang
           sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100
           sudo update-alternatives --set c++ /usr/bin/clang++
+          ccache -M 2G
+          ccache -z
 
       - name: Make Scripts Executable
         run: chmod +x scripts/*.sh
@@ -112,6 +134,6 @@ jobs:
             ### OpenJDK 25 Android 16 (16KB Page Aligned)
             - Built with Android NDK r28+ (16KB ELF segment alignment compliant for Android 15/16).
             - Packaged as standalone `.tar.xz` archives.
-            - Architectures: `aarch64`, `arm`, `x86_64`, `x86`.
+            - Architectures: `aarch64`.
           draft: false
           prerelease: false

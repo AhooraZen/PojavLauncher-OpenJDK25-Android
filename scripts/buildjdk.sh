@@ -21,8 +21,16 @@ elif [[ -n "$JAVA_HOME" && -d "$JAVA_HOME" ]]; then
     BOOT_JDK_ARG="--with-boot-jdk=$JAVA_HOME"
 fi
 
+# Enable ccache if available
+CCACHE_ARG="--disable-ccache"
+if which ccache >/dev/null 2>&1; then
+    echo "Found ccache, enabling..."
+    CCACHE_ARG="--enable-ccache"
+fi
+
 bash ./configure \
     $BOOT_JDK_ARG \
+    $CCACHE_ARG \
     --openjdk-target="$TARGET" \
     --with-toolchain-type=clang \
     --with-devkit="$TOOLCHAIN" \
@@ -58,5 +66,10 @@ bash ./configure \
 
 echo "Building OpenJDK 25 (images target)..."
 make images JOBS="$(nproc)"
+
+if which ccache >/dev/null 2>&1; then
+    echo "=== ccache stats ==="
+    ccache -s
+fi
 
 echo "=== Build OpenJDK 25 complete ==="
