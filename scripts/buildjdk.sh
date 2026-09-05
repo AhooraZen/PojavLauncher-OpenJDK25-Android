@@ -23,6 +23,22 @@ fi
 bash ./configure \
     $BOOT_JDK_ARG \
     --openjdk-target="$TARGET" \
+    --with-toolchain-type=clang \
+    --with-devkit="$TOOLCHAIN" \
+    --with-sysroot="$TOOLCHAIN/sysroot" \
+    CC="$CC" \
+    CXX="$CXX" \
+    BUILD_CC="$(which clang)" \
+    BUILD_CXX="$(which clang++)" \
+    BUILD_NM="$(which llvm-nm || which nm)" \
+    BUILD_AR="$(which llvm-ar || which ar)" \
+    BUILD_STRIP="$(which llvm-strip || which strip)" \
+    BUILD_OBJCOPY="$(which llvm-objcopy || which objcopy)" \
+    AR="$AR" \
+    NM="$NM" \
+    STRIP="$STRIP" \
+    OBJCOPY="$OBJCOPY" \
+    OBJDUMP="$OBJDUMP" \
     --with-extra-cflags="$CFLAGS" \
     --with-extra-cxxflags="$CXXFLAGS" \
     --with-extra-ldflags="$LDFLAGS" \
@@ -33,8 +49,6 @@ bash ./configure \
     --with-freetype-include="$FREETYPE_DIR/include/freetype2" \
     --with-freetype-lib="$FREETYPE_DIR/lib" \
     --with-cups-include="$CUPS_DIR" \
-    --with-devkit="$TOOLCHAIN" \
-    --with-toolchain-type=clang \
     --enable-cds=no
 
 echo "Building OpenJDK 25 (images target)..."

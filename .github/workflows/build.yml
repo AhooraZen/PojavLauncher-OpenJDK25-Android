@@ -62,6 +62,13 @@ jobs:
           rm ndk.zip
           echo "ANDROID_NDK_HOME=$GITHUB_WORKSPACE/android-ndk-$NDK_VER" >> $GITHUB_ENV
 
+      - name: Configure Host Compilers to Clang
+        run: |
+          sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang 100
+          sudo update-alternatives --set cc /usr/bin/clang
+          sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100
+          sudo update-alternatives --set c++ /usr/bin/clang++
+
       - name: Make Scripts Executable
         run: chmod +x scripts/*.sh
 
