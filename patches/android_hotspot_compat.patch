@@ -1,24 +1,56 @@
 --- a/src/hotspot/os/linux/os_linux.cpp
 +++ b/src/hotspot/os/linux/os_linux.cpp
-@@ -1762,6 +1762,7 @@ void * os::Linux::dll_load_in_vmthread(const char *filename, char *ebuf,
- }
+@@ -138,7 +138,7 @@
+ // for timer info max values which include all bits
+ #define ALL_64_BITS CONST64(0xFFFFFFFFFFFFFFFF)
 
- const char* os::Linux::dll_path(void* lib) {
-+#if defined(RTLD_DI_LINKMAP) && !defined(__ANDROID__)
-   struct link_map *lmap;
-   const char* l_path = nullptr;
-   assert(lib != nullptr, "dll_path parameter must not be null");
-@@ -1770,6 +1771,9 @@ const char* os::Linux::dll_path(void* lib) {
-     l_path = lmap->l_name;
-   }
-   return l_path;
+-#ifdef MUSL_LIBC
++#if defined(MUSL_LIBC) || defined(__ANDROID__)
+ // dlvsym is not a part of POSIX
+ // and musl libc doesn't implement it.
+ static void *dlvsym(void *handle,
+@@ -573,6 +573,7 @@ extern "C" void breakpoint() {
+ // detecting pthread library
+
+ void os::Linux::libpthread_init() {
++#ifndef __ANDROID__
+   // Save glibc and pthread version strings.
+ #if !defined(_CS_GNU_LIBC_VERSION) || \
+     !defined(_CS_GNU_LIBPTHREAD_VERSION)
+@@ -597,6 +598,9 @@ void os::Linux::libpthread_init() {
+   confstr(_CS_GNU_LIBPTHREAD_VERSION, str, n);
+   os::Linux::set_libpthread_version(str);
+ #endif
 +#else
-+  return nullptr;
++  os::Linux::set_libpthread_version("NPTL");
 +#endif
  }
 
- static unsigned count_newlines(const char* s) {
-@@ -3480,6 +3484,7 @@ bool os::Linux::hugetlbfs_sanity_check(bool warn, size_t page_size) {
+ const char* os::Linux::dll_path(void* lib) {
+@@ -1870,11 +1874,12 @@ const char* os::Linux::dll_path(void* lib) {
+   struct link_map *lmap;
+   const char* l_path = nullptr;
+   assert(lib != nullptr, "dll_path parameter must not be null");
+-
++#ifndef __ANDROID__
+   int res_dli = ::dlinfo(lib, RTLD_DI_LINKMAP, &lmap);
+   if (res_dli == 0) {
+     l_path = lmap->l_name;
+   }
++#endif
+   return l_path;
+ }
+
+@@ -3019,7 +3024,7 @@ void os::Linux::sched_getcpu_init() {
+   }
+
+   if (sched_getcpu() == -1) {
+-    vm_exit_during_initialization("getcpu(2) system call not supported by kernel");
++    warning("getcpu(2) system call not supported by kernel");
+   }
+ }
+
+@@ -3480,6 +3485,7 @@ bool os::Linux::hugetlbfs_sanity_check(bool warn, size_t page_size) {
  }
 
  bool os::Linux::shm_hugetlbfs_sanity_check(bool warn, size_t page_size) {
@@ -26,7 +58,7 @@
    // Try to create a large shared memory segment.
    int shmid = shmget(IPC_PRIVATE, page_size, SHM_HUGETLB|IPC_CREAT|SHM_R|SHM_W);
    if (shmid == -1) {
-@@ -3501,6 +3506,10 @@ bool os::Linux::shm_hugetlbfs_sanity_check(bool warn, size_t page_size) {
+@@ -3501,6 +3507,10 @@ bool os::Linux::shm_hugetlbfs_sanity_check(bool warn, size_t page_size) {
    // Managed to create a segment, now delete it.
    shmctl(shmid, IPC_RMID, nullptr);
    return true;
@@ -36,13 +68,13 @@
  }
 
  // From the coredump_filter documentation:
-@@ -3900,6 +3909,7 @@ char* os::Linux::reserve_memory_special_shm(size_t bytes, size_t alignment,
+@@ -3900,6 +3910,7 @@ char* os::Linux::reserve_memory_special_shm(size_t bytes, size_t alignment,
                                              char* req_addr, bool exec) {
 +#ifndef __ANDROID__
    // "exec" is passed in but not used.  Creating the shared image for
    // the code cache doesn't have an SHM_X executable permission to check.
    assert(UseLargePages && UseSHM, "only for SHM large pages");
-@@ -3946,6 +3956,9 @@ char* os::Linux::reserve_memory_special_shm(size_t bytes, size_t alignment,
+@@ -3946,6 +3957,9 @@ char* os::Linux::reserve_memory_special_shm(size_t bytes, size_t alignment,
    shmctl(shmid, IPC_RMID, nullptr);
 
    return addr;
@@ -52,7 +84,7 @@
  }
 
  static void log_on_commit_special_failure(char* req_addr, size_t bytes,
-@@ -4030,6 +4043,7 @@ char* os::pd_reserve_memory_special(size_t bytes, size_t alignment, size_t page_
+@@ -4030,6 +4044,7 @@ char* os::pd_reserve_memory_special(size_t bytes, size_t alignment, size_t page_
  }
 
  bool os::Linux::release_memory_special_shm(char* base, size_t bytes) {
@@ -60,25 +92,27 @@
    // detaching the SHM segment will also delete it, see reserve_memory_special_shm()
    return shmdt(base) == 0;
 +#else
-+  return false;
+  return false;
 +#endif
  }
 
  bool os::Linux::release_memory_special_huge_tlbfs(char* base, size_t bytes) {
-@@ -5120,6 +5134,16 @@ bool os::is_thread_cpu_time_supported() {
+@@ -5271,7 +5286,20 @@ bool os::is_thread_cpu_time_supported() {
  // Linux doesn't yet have a (official) notion of processor sets,
  // so just return the system wide load average.
  int os::loadavg(double loadavg[], int nelem) {
-+#ifndef __ANDROID__
-   return ::getloadavg(loadavg, nelem);
-+#else
++#if defined(__ANDROID__) && __ANDROID_API__ < 29
 +  if (nelem < 0) return -1;
 +  if (nelem > 3) nelem = 3;
++
 +  struct sysinfo si;
 +  if (sysinfo(&si) == -1) return -1;
++
 +  for (int i = 0; i < nelem; ++i) {
-+    loadavg[i] = static_cast<double>(si.loads[i]) / static_cast<double>(1 << SI_LOAD_SHIFT);
++    loadavg[i] = (double)(si.loads[i]) / (double)(1 << SI_LOAD_SHIFT);
 +  }
 +  return nelem;
++#else
+   return ::getloadavg(loadavg, nelem);
 +#endif
  }
