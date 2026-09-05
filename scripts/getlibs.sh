@@ -9,12 +9,13 @@ source "$SCRIPT_DIR/setdevkitpath.sh"
 mkdir -p "$ROOT_DIR/build_deps"
 cd "$ROOT_DIR/build_deps"
 
-# Download FreeType
+# Download FreeType official release tarball (self-contained, no git submodules required)
 if [[ ! -d "freetype-$BUILD_FREETYPE_VERSION" ]]; then
-    echo "Downloading FreeType $BUILD_FREETYPE_VERSION..."
-    if ! curl -sSL -f "https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-2-13-3/freetype-VER-2-13-3.tar.gz" -o freetype.tar.gz; then
-        curl -sSL -f "https://sourceforge.net/projects/freetype/files/freetype2/$BUILD_FREETYPE_VERSION/freetype-$BUILD_FREETYPE_VERSION.tar.gz/download" -o freetype.tar.gz
-    fi
+    echo "Downloading FreeType $BUILD_FREETYPE_VERSION official tarball..."
+    curl -sSL -f "https://download.savannah.gnu.org/releases/freetype/freetype-$BUILD_FREETYPE_VERSION.tar.gz" -o freetype.tar.gz || \
+    curl -sSL -f "https://sourceforge.net/projects/freetype/files/freetype2/$BUILD_FREETYPE_VERSION/freetype-$BUILD_FREETYPE_VERSION.tar.gz/download" -o freetype.tar.gz || \
+    curl -sSL -f "https://netcologne.dl.sourceforge.net/project/freetype/freetype2/$BUILD_FREETYPE_VERSION/freetype-$BUILD_FREETYPE_VERSION.tar.gz" -o freetype.tar.gz
+
     mkdir -p "freetype-$BUILD_FREETYPE_VERSION"
     tar -xzf freetype.tar.gz --strip-components=1 -C "freetype-$BUILD_FREETYPE_VERSION"
 fi
@@ -22,7 +23,6 @@ fi
 # Build FreeType for Android
 echo "Building FreeType for $TARGET..."
 cd "freetype-$BUILD_FREETYPE_VERSION"
-make distclean 2>/dev/null || true
 
 ./configure \
     --host="$TARGET" \
